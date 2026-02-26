@@ -1,21 +1,34 @@
-# For creating backend API 
-flask==2.3.3
-# Dependancies for langchain and openai
-werkzeug==2.3.7
-# Orcharastration and deployment
-langchain==0.1.0
-# For interacting with OpenAI API
-openai==0.27.8
-# For loading environment variables from .env file
-python-dotenv==1.0.0
-# For interacting with AWS services (like S3 for storing documents)
-boto3==1.28.0
-# Storing and retrieving data
-chromadb==0.4.17
-pydantic>=1.0,<2.0
-# For parsing PDF documents
-pypdf==3.9.0
-# For tokenization and counting tokens
-tiktoken>=0.7.0
-# For parsing various document formats
-unstructured==0.10.30
+# Web Framework
+flask
+werkzeug
+
+# LangChain Dependencies
+langchain
+langchain-core
+langchain-community
+langchain-openai
+
+# OpenAI API Integration
+openai
+
+# Vector Database & Data Processing
+chromadb
+numpy
+
+# Document Processing
+pypdf
+unstructured
+
+# Configuration & Environment
+python-dotenv
+pydantic
+
+# AWS S3 Integration
+boto3
+botocore
+
+# Tokenization for LLMs
+tiktoken
+
+# Additional dependencies
+requests
