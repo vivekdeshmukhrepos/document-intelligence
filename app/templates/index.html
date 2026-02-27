@@ -3,42 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Knowledge Intelligence System</title>
+    <title>Document Intelligence</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Knowledge Intelligence System</h1>
-        
-        <div class="upload-section">
-            <h2>Upload Documents</h2>
-            <form id="upload-form">
-                <input type="file" id="file-input" multiple>
-                <button type="submit">Upload</button>
-            </form>
-        </div>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-brain"></i>
+                    <h1>Document Intelligence</h1>
+                </div>
+                <p class="subtitle">Upload documents and get instant AI-powered answers</p>
+            </div>
+        </header>
 
-        <div class="query-section">
-            <h2>Ask Questions</h2>
-            <textarea id="question-input" placeholder="Enter your question..."></textarea>
-            <button id="submit-question">Ask</button>
-        </div>
+        <main class="main-content">
+            <!-- Left Sidebar -->
+            <aside class="sidebar">
+                <div class="documents-panel">
+                    <h2><i class="fas fa-file-upload"></i> Documents</h2>
+                    <div class="upload-area" id="upload-area">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag & drop files here</p>
+                        <p class="small-text">or click to browse</p>
+                        <input type="file" id="file-input" multiple accept=".pdf,.txt" hidden>
+                    </div>
+                    <div id="uploaded-files" class="uploaded-files"></div>
+                    <div id="upload-progress" class="upload-progress" style="display: none;">
+                        <div class="progress-bar"></div>
+                        <p id="progress-text">Uploading...</p>
+                    </div>
+                </div>
+            </aside>
 
-        <div class="response-section">
-            <h2>Response</h2>
-            <div id="response-content"></div>
-        </div>
+            <!-- Main Chat Area -->
+            <section class="chat-section">
+                <div class="chat-container">
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="welcome-message">
+                            <h2>Welcome to Document Intelligence</h2>
+                            <p>Upload documents to get started, then ask questions about their content.</p>
+                            <div class="features">
+                                <div class="feature">
+                                    <i class="fas fa-upload"></i>
+                                    <span>Upload PDF or TXT files</span>
+                                </div>
+                                <div class="feature">
+                                    <i class="fas fa-search"></i>
+                                    <span>Search with AI</span>
+                                </div>
+                                <div class="feature">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <span>Get intelligent answers</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-section">
+                        <div class="input-wrapper">
+                            <textarea id="question-input" 
+                                      placeholder="Ask a question about your documents..."
+                                      rows="3"></textarea>
+                            <button id="submit-question" class="send-btn">
+                                <i class="fas fa-paper-plane"></i>
+                                <span>Send</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
 
     <script>
-        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+        // Drag and drop functionality
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const chatMessages = document.getElementById('chat-messages');
+        const questionInput = document.getElementById('question-input');
+        const submitBtn = document.getElementById('submit-question');
+        const uploadedFilesList = document.getElementById('uploaded-files');
+
+        // Click to upload
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        // Handle file upload
+        async function handleFiles(files) {
             const formData = new FormData();
-            const files = document.getElementById('file-input').files;
+            const fileNames = [];
             
             for (let file of files) {
                 formData.append('file', file);
+                fileNames.push(file.name);
             }
+
+            // Show upload progress
+            document.getElementById('upload-progress').style.display = 'block';
+            uploadArea.style.display = 'none';
 
             try {
                 const response = await fetch('/upload', {
@@ -46,16 +131,52 @@
                     body: formData
                 });
                 const result = await response.json();
-                alert(result.message || result.error);
+                
+                // Hide progress and show results
+                document.getElementById('upload-progress').style.display = 'none';
+                uploadArea.style.display = 'flex';
+                
+                if (response.ok) {
+                    // Add files to the uploaded list
+                    fileNames.forEach(name => {
+                        const fileItem = document.createElement('div');
+                        fileItem.className = 'file-item';
+                        fileItem.innerHTML = `<i class="fas fa-file"></i> <span>${name}</span><i class="fas fa-check" style="color: #28a745;"></i>`;
+                        uploadedFilesList.appendChild(fileItem);
+                    });
+                    
+                    // Add system message
+                    addMessage('system', `✓ Successfully uploaded ${fileNames.length} document(s)`);
+                } else {
+                    addMessage('error', `Error: ${result.error || 'Upload failed'}`);
+                }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error uploading files');
+                document.getElementById('upload-progress').style.display = 'none';
+                uploadArea.style.display = 'flex';
+                addMessage('error', 'Error uploading files. Please try again.');
+            }
+        }
+
+        // Send question
+        submitBtn.addEventListener('click', sendQuestion);
+        questionInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendQuestion();
             }
         });
 
-        document.getElementById('submit-question').addEventListener('click', async () => {
-            const question = document.getElementById('question-input').value;
-            
+        async function sendQuestion() {
+            const question = questionInput.value.trim();
+            if (!question) return;
+
+            // Add user message
+            addMessage('user', question);
+            questionInput.value = '';
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
+
             try {
                 const response = await fetch('/query', {
                     method: 'POST',
@@ -65,13 +186,53 @@
                     body: JSON.stringify({ question })
                 });
                 const result = await response.json();
-                document.getElementById('response-content').textContent = 
-                    result.response || result.error;
+
+                if (response.ok) {
+                    addMessage('assistant', result.response);
+                } else {
+                    addMessage('error', `Error: ${result.error || 'Failed to get response'}`);
+                }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error getting response');
+                addMessage('error', 'Error getting response. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('loading');
+                questionInput.focus();
             }
-        });
+        }
+
+        // Add message to chat
+        function addMessage(role, content) {
+            // Remove welcome message on first interaction
+            const welcome = chatMessages.querySelector('.welcome-message');
+            if (welcome) welcome.remove();
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message message-${role}`;
+            
+            if (role === 'user') {
+                messageDiv.innerHTML = `<div class="message-content">${escapeHtml(content)}</div>`;
+            } else if (role === 'assistant') {
+                messageDiv.innerHTML = `<div class="message-content">${escapeHtml(content)}</div>`;
+            } else if (role === 'system') {
+                messageDiv.className = 'message message-system';
+                messageDiv.innerHTML = `<div class="message-content">${content}</div>`;
+            } else if (role === 'error') {
+                messageDiv.className = 'message message-error';
+                messageDiv.innerHTML = `<div class="message-content"><i class="fas fa-exclamation-circle"></i> ${content}</div>`;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
     </script>
 </body>
 </html>

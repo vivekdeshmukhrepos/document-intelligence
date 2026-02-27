@@ -1,12 +1,12 @@
 # Import chromadb - a vector database library for storing and retrieving embeddings
 # chromadb is lightweight, open-source, and designed for semantic search on embeddings
 import chromadb 
-# Import Chroma from LangChain - a wrapper that integrates chromadb with LangChain framework
+# Import Chroma from langchain_chroma - the official LangChain Chroma integration
 # This provides seamless integration with LangChain's document processing pipeline
-from langchain.vectorstores import Chroma
+from langchain_chroma import Chroma
 # Import OpenAIEmbeddings to convert text into vector embeddings using OpenAI's models
 # Embeddings transform text into numerical vectors that capture semantic meaning
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 
 
 # Define VectorStore class to manage document embeddings and similarity search

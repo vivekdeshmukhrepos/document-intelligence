@@ -8,10 +8,10 @@ from services.llm_service import LLMService
 from config import Config
 # Import os for file system operations like path handling and file removal
 import os 
-# Import document loaders from LangChain for reading PDF and text files
-from langchain.document_loaders import TextLoader, PyPDFLoader 
-# Import RecursiveCharacterTextSplitter to split large documents into manageable chunks
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+# Import document loaders from LangChain Community for reading PDF and text files
+from langchain_community.document_loaders import TextLoader, PyPDFLoader 
+# Import RecursiveCharacterTextSplitter from the text_splitters package
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 # Import tempfile to create temporary directories for processing uploaded files
 import tempfile
 # Import logging for tracking application events and debugging

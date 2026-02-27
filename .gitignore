@@ -208,3 +208,5 @@ __marimo__/
 doc_int_vector_db/chroma-collections.parquet
 doc_int_vector_db/chroma-embeddings.parquet
 doc_int_vector_db/chroma.sqlite3
+app/doc_int_vector_db/chroma.sqlite3
+/doc_int_vector_db
